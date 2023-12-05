@@ -26,73 +26,81 @@ func main() {
 func run(input string, part int) int {
 	sum := 0
 	lines := strings.Split(input, "\n")
-	
+
 	grid := make(map[int]string)
 	for i, r := range lines {
 		grid[i] = r
 	}
 
-	//symbols := "!@#$%^&*()+/="
-	for i :=0; i <len(grid); i ++ {
+	for i := 0; i < len(grid); i++ {
 		re := regexp.MustCompile(`\d+`)
 		r := grid[i]
 		nums := re.FindAllString(r, -1)
-
+		multiples := 0
 		for _, num := range nums {
+			found := false
 			index := strings.Index(r, num)
+			iReg := regexp.MustCompile(`\D` + num + `\D`)
+			nIndex := iReg.FindAllStringIndex(r, -1)
+			if nIndex != nil {
+				if len(nIndex) == 1 {
+					index = nIndex[0][0] + 1
+				} else {
+					index = nIndex[multiples][0] + 1
+					multiples++
+				}
+			}
+			singleIndex := 0
+			if len(num) == 1 {
+				re := regexp.MustCompile(`\b\d\b`)
+				singles := re.FindStringIndex(r)
+				index = singles[singleIndex]
+				singleIndex++
+			}
+
 			conNum, _ := strconv.Atoi(num)
 			// check left
-			//strings.Contains(symbols, string(r[index-1]))
-			if index - 1 > 0 && isSymbol(grid, i, index -1)   {
+			if index-1 > 0 && isSymbol(grid, i, index-1) {
 				sum += conNum
-				break
+				continue
 			}
 
 			// check right
-			//strings.Contains(symbols, string(r[index + len(num)]))
-			if index + len(num) < len(r) && isSymbol(grid, i, index + len(num))  {
+			if index+len(num) < len(r) && isSymbol(grid, i, index+len(num)) {
 				sum += conNum
-				break
+				continue
 			}
 
-			for col := index; col < col + len(num); col++ {
+			for col := index; col < index+len(num); col++ {
 				if col >= len(r) {
 					break
 				}
 				// check top
 				if i > 0 && isSymbol(grid, i-1, col) {
-					sum += conNum
-					break
+					found = true
 				}
+
 				// check bottom
 				if i+1 < len(r) && isSymbol(grid, i+1, col) {
-					sum += conNum
-					break
+					found = true
 				}
 
 				// check diag
-				if i >0 && col > 0 && isSymbol(grid, i-1, col-1) {
-					sum += conNum
-					break
+				if i > 0 && col > 0 && isSymbol(grid, i-1, col-1) || //top left
+					i+1 < len(r) && col > 0 && isSymbol(grid, i+1, col-1) || // bottom left
+					i > 0 && col+1 < len(grid[i]) && isSymbol(grid, i-1, col+1) || // top right
+					i+1 < len(r) && col+1 < len(grid[i]) && isSymbol(grid, i+1, col+1) /*bottom right*/ { 
+					found = true
 				}
-				
-				if  i +1 < len(r) && col > 0 && isSymbol(grid, i+1, col-1) {
-					sum += conNum
-					break
-				}
-				if  i >0 && col +1 < len(grid[i]) && isSymbol(grid, i-1, col +1) {
-					sum += conNum
-					break
-				}
-				if  i +1 < len(r) && col +1 < len(grid[i]) && isSymbol(grid, i+1, col+1) {
-					sum += conNum
-					break
-				}
+
 			}
-			
+			if found {
+				sum += conNum
+			}
 		}
+
 	}
-	//352629 low
+
 	return sum
 }
 
@@ -101,7 +109,6 @@ func isSymbol(grid map[int]string, i int, col int) bool {
 	_, err := strconv.Atoi(cell)
 	if cell != "." && err != nil {
 		return true
-
 	}
 	return false
 }
