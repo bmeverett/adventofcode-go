@@ -22,6 +22,7 @@ func main() {
 	fmt.Println(output)
 
 }
+
 var cardVal = map[string]int{
 	"A": 14,
 	"K": 13,
@@ -50,7 +51,6 @@ func run(input string, part int) int {
 	high := make([]string, 0)
 
 	handToVal := make(map[string]int)
-	
 
 	for _, r := range lines {
 		line := strings.Split(r, " ")
@@ -58,49 +58,109 @@ func run(input string, part int) int {
 		val, _ := strconv.Atoi(line[1])
 		handToVal[hand] = val
 		cardCount := make(map[string]int)
-		for i:= 0; i < len(hand); i++ {
-			_, exists := cardCount[string([]rune(hand)[i])]
+		values := make([]int, 0)
+		for i := 0; i < len(hand); i++ {
+			card := string([]rune(hand)[i])
+			_, exists := cardCount[card]
 			if exists {
-				cardCount[string([]rune(hand)[i])]++
+				cardCount[card]++
 			} else {
-				cardCount[string([]rune(hand)[i])] = 1
+				cardCount[card] = 1
 			}
 		}
 
-		length := len(cardCount)
-		if length == 1 {
-			// 5 of a kind
-			five = append(five, hand)
-		} else if length == 2 {
-			// 4 of a kind or full house
-			for _, cnt := range cardCount {
-				if cnt == 4 || cnt == 1 {
-					four = append(four, hand)
-					break
-				} else if cnt == 3 || cnt == 2 {
-					full = append(full, hand)
-					break
-				}
+		for c,v := range cardCount {
+			if c == "J" && part ==2 {
+				continue
 			}
-		} else if length == 3 {
-			// 3 of a kind or two pair
-			for _, cnt := range cardCount {
-				if cnt == 3 {
-					three = append(three, hand)
-					break
-				} else if cnt == 2 {
-					two = append(two, hand)
-					break
-				}
-			}
-		} else if length == 4 {
-			// 1 pair
-			one = append(one, hand)
-		} else {
-			// high card
-			high = append(high, hand)
+			values = append(values, v)
 		}
-	} 
+
+		sort.Ints(values)
+
+		length := len(cardCount)
+		
+		_, hasJack := cardCount["J"]
+		if part == 2 && hasJack {
+			cardVal["J"] = 0
+			jacks := cardCount["J"]
+			delete(cardCount, "J")
+			length = len(cardCount)
+			if length == 1 || length == 0 {
+				// 5 of a kind
+				five = append(five, hand)
+			} else if length == 2 {
+				// 4 of a kind or full house
+				twoCount := 0
+				for _, cnt := range values {
+					if cnt == 3 || cnt == 1 {
+						four = append(four, hand)
+						break
+					} else if cnt == 2 {
+						twoCount++
+					}
+				}
+
+				if twoCount == 2 {
+					full = append(full, hand)
+				} else if twoCount == 1 && jacks == 2 {
+					four = append(three, hand)
+				} else if twoCount == 1 && jacks == 1 {
+					three = append(three, hand)
+				}
+			} else if length == 3 {
+				// 3 of a kind or two pair
+				threeTwoCount := 0
+				for _, cnt := range values {
+					if cnt == 2 {
+						threeTwoCount++
+					} 
+				}
+
+				if threeTwoCount == 2 {
+					full = append(full, hand)
+				} else {
+					three = append(three, hand)
+				}
+			} else if length == 4 {
+				// 1 pair
+				one = append(one, hand)
+			} 
+		} else {
+			if length == 1 {
+				// 5 of a kind
+				five = append(five, hand)
+			} else if length == 2 {
+				// 4 of a kind or full house
+				for _, cnt := range values {
+					if cnt == 4 || cnt == 1 {
+						four = append(four, hand)
+						break
+					} else if cnt == 3 || cnt == 2 {
+						full = append(full, hand)
+						break
+					}
+				}
+			} else if length == 3 {
+				// 3 of a kind or two pair
+				for _, cnt := range values {
+					if cnt == 3 {
+						three = append(three, hand)
+						break
+					} else if cnt == 2 {
+						two = append(two, hand)
+						break
+					}
+				}
+			} else if length == 4 {
+				// 1 pair
+				one = append(one, hand)
+			} else {
+				// high card
+				high = append(high, hand)
+			}
+		}
+	}
 
 	sortHands(high)
 	sortHands(one)
@@ -109,7 +169,7 @@ func run(input string, part int) int {
 	sortHands(three)
 	sortHands(four)
 	sortHands(five)
-	
+
 	finalIndex := 1
 	for _, f := range high {
 		sum += handToVal[f] * finalIndex
@@ -146,12 +206,14 @@ func run(input string, part int) int {
 		finalIndex++
 	}
 
+	// 253521250 low
+	// 288675511 high
 	return sum
 }
 
 func sortHands(arr []string) {
 	sort.SliceStable(arr, func(i, j int) bool {
-		for ch:=0; ch< len(arr[i]); ch++ {
+		for ch := 0; ch < len(arr[i]); ch++ {
 			left := string([]rune(arr[i])[ch])
 			right := string([]rune(arr[j])[ch])
 
