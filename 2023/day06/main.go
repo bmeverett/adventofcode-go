@@ -3,7 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"slices"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/bmeverett/adventofcode-go/utils"
@@ -25,59 +26,41 @@ func main() {
 func run(input string, part int) int {
 	sum := 0
 	lines := strings.Split(input, "\n")
-	totalCards := make(map[int]int)
+	
+	if part == 2{
+		re := regexp.MustCompile(`\s+`)
+        out := re.ReplaceAllString(lines[0], "")
+        lines[0] = strings.TrimSpace(out)
 
-	for init := range lines {
-		totalCards[init+1] = 1
-	}
-	totalCount := 0
-	for i, r := range lines {
-		row :=  strings.Split(r, ":")
-		cards := strings.Split(strings.Trim(row[1], ""), "|")
-
-		myCard := strings.Split(strings.Trim(cards[1], " "), " ")
-		winningNums := strings.Split(strings.Trim(cards[0], " "), " ")
-		multipler := 0
-		count := 0
-		for _, num := range myCard {
-			if num == "" {
-				continue
-			}
-			if slices.Contains(winningNums, num) {
-				if multipler == 0 {
-					multipler = 1
-					count += 1
-				} else {
-					multipler *=2
-					count += 1
-				}
-			}
-		}
-		i += 1
-		sum += multipler
-		for c := i + 1; c <= count + i; c++ {
-			if i == 1 {
-				totalCards[c]++
-				//totalCount++
-			} else {
-				totalCards[c] += totalCards[i]
-				//totalCount+= totalCards[i]
-			}
-		}
-
-		// if part == 2 && multipler == 0{
-		// 	break
-		// }
-
+		out = re.ReplaceAllString(lines[1], "")
+        lines[1] = strings.TrimSpace(out)
 	}
 
+	re := regexp.MustCompile(`\d+`)
+		
 
-	if part == 2 {
-		for _, count := range totalCards {
-			totalCount += count
+	times := re.FindAllString(lines[0], -1)
+	distances := re.FindAllString(lines[1], -1)
+
+	for i := 0; i<len(times); i++ {
+		time, _ := strconv.Atoi(times[i])
+		distance, _ := strconv.Atoi(distances[i])
+		count :=0
+
+		for t:=1; t< time; t++ {
+			timeLeft := time -t 
+			moved := t * timeLeft
+			if moved > distance {
+				count ++
+			}
+		} 
+		if sum == 0 {
+			sum = count
+		} else {
+			sum *= count
 		}
-		return totalCount
 	}
+
 	return sum
 }
 
