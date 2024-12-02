@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bmeverett/adventofcode-go/utils"
+	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -58,11 +59,7 @@ func run(input string, part int) int {
 
 	for i := 0; i < len(left); i++ {
 		if part == 1 {
-			if left[i] < right[i] {
-				diff += right[i] - left[i]
-			} else if left[i] > right[i] {
-				diff += left[i] - right[i]
-			}
+			diff += int(math.Abs(float64(left[i]) - float64(right[i])))
 		} else {
 			diff += rCnt[left[i]] * left[i]
 		}
