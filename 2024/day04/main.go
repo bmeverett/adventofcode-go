@@ -32,24 +32,22 @@ func run(input string, part int) int {
 		return strings.Count(lineStr, word) + strings.Count(reverseString(lineStr), word)
 	}
 
-	if part == 1 {
-		for i, row := range rows {
-			grid[i] = make([]rune, len(row))
-			for j, cell := range row {
-				grid[i][j] = cell
-			}
-
-			count += countWordInLine([]rune(row), word)
+	for i, row := range rows {
+		grid[i] = make([]rune, len(row))
+		for j, cell := range row {
+			grid[i][j] = cell
 		}
 
-		for i, row := range rows {
-			var vert []rune
-			for j, _ := range row {
-				vert = append(vert, grid[j][i])
-			}
+		count += countWordInLine([]rune(row), word)
+	}
 
-			count += countWordInLine(vert, word)
+	for i, row := range rows {
+		var vert []rune
+		for j, _ := range row {
+			vert = append(vert, grid[j][i])
 		}
+
+		count += countWordInLine(vert, word)
 	}
 
 	rowLen := len(rows)
