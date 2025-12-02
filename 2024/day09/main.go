@@ -42,17 +42,108 @@ func run(input string, part int) int64 {
 		file = !file
 	}
 
+	fileCount := 0
+	currentFile := ""
+	fmt.Printf("%v\n", blocks)
+
+	spaces := 1
 	for i := len(blocks) - 1; i >= 0; i-- {
 		if len(indexes) == 0 || indexes[0] >= int64(i) {
 			break
 		} else if blocks[i] == "." {
+			spaces++
 			continue
 		}
-		last := blocks[i]
-		blocks[i] = "."
-		blocks[indexes[0]] = last
-		indexes = indexes[1:]
+		if part == 1 {
+			last := blocks[i]
+			blocks[i] = "."
+			blocks[indexes[0]] = last
+			indexes = indexes[1:]
+		} else {
+			if currentFile == "" {
+				currentFile = blocks[i]
+				fileCount++
+			} else if currentFile == blocks[i] {
+				fileCount++
+			} else {
+				//prev := int64(0)
+				//iCount := 0
+				//iMap := make(map[int]int64)
+				//for j, index := range indexes {
+				//	if j == 0 {
+				//		prev = index
+				//		iMap[j] = index
+				//		iCount++
+				//		continue
+				//	}
+				//
+				//	if index-prev > 1 {
+				//		if fileCount <= iCount {
+				//			break
+				//		} else {
+				//			iMap = make(map[int]int64)
+				//			iCount = 0
+				//		}
+				//	}
+				//	iMap[j] = index
+				//	iCount++
+				//	prev = index
+				//
+				//}
+				bCount := 0
+				open := make([]int, 0)
+				for j, b := range blocks {
+					if b == "." {
+						bCount++
+						open = append(open, j)
+					} else if bCount > 0 && bCount <= fileCount {
+						// move
+						for k, o := range open {
+							blocks[o] = currentFile
+							blocks[1+i+k] = "."
+						}
+						bCount = 0
+					} else {
+						bCount = 0
+					}
+
+				}
+
+				// move file
+				//if fileCount <= iCount {
+				//	//for j := 0; j < fileCount; j++ {
+				//	//	blocks[iMap[j]] = currentFile
+				//	//	blocks[i+1+j] = "."
+				//	//	//indexes = indexes[1:]
+				//	//}
+				//
+				//	cnt := 0
+				//	keys := make([]int, 0)
+				//	for k, _ := range iMap {
+				//		keys = append(keys, k)
+				//	}
+				//	sort.Ints(keys)
+				//	for _, k := range keys {
+				//		if cnt+1+i >= len(blocks) {
+				//			break
+				//		}
+				//		blocks[iMap[k]] = currentFile
+				//		blocks[cnt+spaces+i] = "."
+				//		indexes = append(indexes[:k], indexes[k+1:]...)
+				//		cnt++
+				//	}
+				//}
+				fmt.Printf("%v\n", blocks)
+				currentFile = blocks[i]
+				fileCount = 1
+				//iMap = make(map[int]int64)
+				spaces = 1
+
+			}
+		}
 	}
+
+	fmt.Printf("%v\n", blocks)
 
 	for i, block := range blocks {
 		if block == "." {
@@ -64,8 +155,16 @@ func run(input string, part int) int64 {
 		}
 		count += b * int64(i)
 	}
-	//fmt.Printf("%v\n", blocks)
-	return count //4949947618371 low
+
+	return count
+}
+
+func part2(blocks []string) {
+	for i := len(blocks) - 1; i >= 0; i-- {
+		for j := 0; j < len(blocks); j++ {
+
+		}
+	}
 }
 
 func appendStr(fs *[]string, indexes *[]int64, s string, size int) {
