@@ -28,14 +28,31 @@ func run(input string, part int) int {
 		most := 0
 		curr := 0
 		runes := []rune(line)
-		for i, l1 := range runes {
-			for _, l2 := range runes[i+1:] {
-				curr, _ = strconv.Atoi(string(l1) + string(l2))
-				if curr > most {
-					most = curr
+		if part == 1 {
+			for i, l1 := range runes {
+				for _, l2 := range runes[i+1:] {
+					curr, _ = strconv.Atoi(string(l1) + string(l2))
+					if curr > most {
+						most = curr
+					}
 				}
 			}
+		} else {
+			stack := make([]rune, 0)
+			toRemove := len(runes) - 12
+			for _, r := range runes {
+				for len(stack) > 0 && toRemove > 0 && stack[len(stack)-1] < r {
+					stack = stack[:len(stack)-1]
+					toRemove--
+				}
+				stack = append(stack, r)
+			}
+
+			largest := string(stack[:12])
+			val, _ := strconv.Atoi(largest)
+			sum += val
 		}
+
 		fmt.Println(most)
 		sum += most
 	}
